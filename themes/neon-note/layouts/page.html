@@ -1,0 +1,96 @@
+{{ define "main" }}
+<article class="mx-auto post-wrap" itemscope itemtype="https://schema.org/BlogPosting">
+  <header class="mb-4">
+    <h1 class="post-title m-0" itemprop="headline">{{ .Title }}</h1>
+
+    <div class="small text-mute mt-2 d-flex align-items-center gap-3 flex-wrap">
+      {{ with .Date }}
+        {{ $pubISO := . | time.Format "2006-01-02T15:04:05Z07:00" }}
+        <time datetime="{{ $pubISO }}" itemprop="datePublished">
+          {{ . | time.Format (or $.Site.Params.dateFormat "02 Jan 2006") }}
+        </time>
+      {{ end }}
+
+      {{ with .Lastmod }}
+        <meta itemprop="dateModified" content='{{ . | time.Format "2006-01-02T15:04:05Z07:00" }}'>
+      {{ end }}
+
+      {{ $author := or .Params.author .Site.Author.name }}
+      {{ with $author }}
+        <span itemprop="author" itemscope itemtype="https://schema.org/Person">
+          <meta itemprop="name" content="{{ . }}">
+          {{- /* Visual label only: */ -}}<span aria-hidden="true">· {{ . }}</span>
+        </span>
+      {{ end }}
+
+      <span aria-label="Tempo di lettura">· ~{{ .ReadingTime }} min</span>
+      <span aria-label="Conteggio parole" class="visually-hidden">{{ .WordCount }} parole</span>
+    </div>
+
+    {{/* ------ Cover image: .Params.cover oppure prima immagine del bundle ------ */}}
+    {{ $cover := "" }}
+    {{ with .Params.cover }}{{ $cover = . | relURL }}{{ end }}
+    {{ if not $cover }}
+      {{ with .Resources.ByType "image" }}
+        {{ with .Get 0 }}{{ $cover = .RelPermalink }}{{ end }}
+      {{ end }}
+    {{ end }}
+    {{ if $cover }}
+      <figure class="mt-3">
+        <img src="{{ $cover }}" alt="{{ .Title | plainify }}" loading="lazy" decoding="async" class="w-100" style="border-radius:var(--radius-sm)" itemprop="image">
+      </figure>
+    {{ end }}
+
+    {{ with .Params.tags }}
+      <div class="mt-3 d-flex flex-wrap gap-2" aria-label="Tag dell'articolo">
+        {{ range (uniq .) }}
+          <a class="badge tag text-decoration-none" rel="tag" href="{{ "/tags/" | relURL }}{{ . | urlize }}">{{ . }}</a>
+        {{ end }}
+      </div>
+    {{ end }}
+  </header>
+
+  {{/* ------ TOC opzionale se abilitato da Markdown (##) ------ */}}
+  {{ with .TableOfContents }}
+    <aside class="card-min p-3 mb-4" aria-label="Indice dei contenuti">
+      {{ . }}
+    </aside>
+  {{ end }}
+
+  <div class="prose" itemprop="articleBody">
+    {{ .Content }}
+  </div>
+
+  {{/* ------ Nav prev/next ------ */}}
+  <nav class="mt-5" aria-label="Navigazione articolo">
+    <div class="d-flex justify-content-between gap-3 flex-wrap">
+      {{ with .PrevInSection }}
+        <a class="readmore text-decoration-none" href="{{ .RelPermalink }}" aria-label="Articolo precedente: {{ .Title | plainify }}">← {{ .Title }}</a>
+      {{ else }}
+        <span></span>
+      {{ end }}
+      {{ with .NextInSection }}
+        <a class="readmore text-decoration-none" href="{{ .RelPermalink }}" aria-label="Articolo successivo: {{ .Title | plainify }}">{{ .Title }} →</a>
+      {{ end }}
+    </div>
+  </nav>
+
+  {{/* ------ JSON-LD BlogPosting ------ */}}
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"BlogPosting",
+    "headline": {{ .Title | jsonify }},
+    "datePublished": {{ with .Date }}{{ . | time.Format "2006-01-02T15:04:05Z07:00" | jsonify }}{{ else }}null{{ end }},
+    "dateModified": {{ with .Lastmod }}{{ . | time.Format "2006-01-02T15:04:05Z07:00" | jsonify }}{{ else }}null{{ end }},
+    "url": {{ .Permalink | jsonify }},
+    "author": {{ with $author }}{ "@type":"Person", "name": {{ . | jsonify }} }{{ else }}null{{ end }},
+    "image": {{ if $cover }}[ {{ $cover | absURL | jsonify }} ]{{ else }}[]{{ end }},
+    "wordCount": {{ .WordCount }},
+    "articleSection": {{ with .Section }}{{ . | title | jsonify }}{{ else }}null{{ end }},
+    "keywords": [{{- with .Params.tags -}}{{- range $i, $t := (uniq .) -}}{{ if $i}}, {{ end }}{{ $t | jsonify }}{{- end -}}{{- end -}}]
+  }
+  </script>
+  <meta itemprop="mainEntityOfPage" content="{{ .Permalink }}">
+</article>
+{{ end }}

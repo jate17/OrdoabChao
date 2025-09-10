@@ -1,0 +1,47 @@
+{{/* Partial: breadcrumb.jsonld.html
+     Genera JSON-LD BreadcrumbList in modo sicuro, senza len su nil. */}}
+
+{{ $items := slice }}
+
+{{/* Home */}}
+{{ $home := dict "name" (or .Site.Title "Home") "url" (absURL "/") }}
+{{ $items = $items | append $home }}
+
+{{/* Sezione corrente (se c'è) */}}
+{{ with .CurrentSection }}
+  {{ $items = $items | append (dict "name" .Title "url" .Permalink) }}
+{{ end }}
+
+{{/* Nodo corrente:
+    - Pagina singola (post/pagina)
+    - Pagina di sezione / tassonomia / termine
+*/}}
+{{ if .IsPage }}
+  {{ $items = $items | append (dict "name" .Title "url" .Permalink) }}
+{{ else if in (slice "section" "taxonomy" "term" "home") .Kind }}
+  {{ if ne .Kind "home" }}
+    {{ $items = $items | append (dict "name" .Title "url" .Permalink) }}
+  {{ end }}
+{{ end }}
+
+{{/* Se c’è almeno 1 elemento, serializza come BreadcrumbList */}}
+{{ if gt (len $items) 0 }}
+  {{/* Costruisci itemListElement con posizione */}}
+  {{ $list := slice }}
+  {{ range $i, $it := $items }}
+    {{ $list = $list | append (dict
+      "@type" "ListItem"
+      "position" (add $i 1)
+      "name" ($it.name)
+      "item" ($it.url)
+    ) }}
+  {{ end }}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": {{ $list | jsonify }}
+  }
+  </script>
+{{ end }}
+

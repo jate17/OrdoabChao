@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="it" data-bs-theme="dark">
+  <head>{{ partial "head.html" . }}</head>
+  <body class="bg-app text-app">
+    {{ partial "header.html" . }}
+    <main class="container container-narrow py-5">
+      {{ block "main" . }}{{ end }}
+    </main>
+    {{ partial "footer.html" . }}
+    {{ partial "scripts.html" . }}
+  </body>
+</html>

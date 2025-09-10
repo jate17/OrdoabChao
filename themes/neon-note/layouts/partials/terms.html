@@ -1,0 +1,114 @@
+{{ define "main" }}
+  <section class="hero vstack gap-2 mb-4" aria-labelledby="tax-title">
+    <h1 id="tax-title" class="display-6 fw-600 text-white m-0">{{ .Title }}</h1>
+    {{ with .Params.description }}
+      <p class="lead text-mute m-0">{{ . }}</p>
+    {{ else }}
+      <p class="lead text-mute m-0">Sfoglia tutti i termini e filtra in tempo reale.</p>
+    {{ end }}
+  </section>
+
+  <div class="card-min mb-4" role="search" aria-label="Filtro termini">
+    <div class="card-body">
+      <label for="termFilter" class="small text-mute d-block mb-1">Filtra termini</label>
+      <input id="termFilter" type="search" class="form-control"
+        placeholder="Cerca un termine…"
+        aria-describedby="termCount"
+        style="background:var(--surface); border:1px solid var(--ink); color:var(--txt); border-radius:var(--radius-sm);">
+      <div id="termCount" class="small text-mute mt-2" aria-live="polite"></div>
+    </div>
+  </div>
+
+  {{/* Crea gruppi A–Z in modo sicuro */}}
+  {{ $groups := dict }}
+  {{ with .Data.Terms.Alphabetical }}
+    {{ range . }}
+      {{ $title := .Page.Title }}
+      {{ $letter := (substr (upper $title) 0 1) }}
+      {{ if not (isset $groups $letter) }}
+        {{ $groups = merge $groups (dict $letter (slice .)) }}
+      {{ else }}
+        {{ $groups = merge $groups (dict $letter (append (index $groups $letter) .)) }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+
+  <section id="termsRoot" class="vstack gap-4" itemscope itemtype="https://schema.org/CollectionPage">
+    {{ range $letter, $items := $groups }}
+      <section class="vstack gap-2 term-group" data-letter="{{ $letter }}" aria-labelledby="group-{{ $letter }}">
+        <h2 id="group-{{ $letter }}" class="h6 m-0 text-white" style="opacity:.9">{{ $letter }}</h2>
+        <div class="d-flex flex-wrap gap-2">
+          {{ range $items }}
+            <a class="badge tag text-decoration-none term-item"
+               href="{{ .Page.RelPermalink }}"
+               data-term="{{ lower .Page.Title }}"
+               aria-label="{{ .Page.Title }} ({{ .Count }} articoli)"
+               rel="tag"
+               itemprop="hasPart">
+              {{ .Page.Title }}
+              <span class="small text-mute">({{ .Count }})</span>
+            </a>
+          {{ end }}
+        </div>
+      </section>
+    {{ end }}
+  </section>
+
+  {{/* JSON-LD sicuro: usa `with` per evitare `len` su valore zero */}}
+  {{ with .Data.Terms.Alphabetical }}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": {{ $.Title | jsonify }},
+      "itemListOrder": "http://schema.org/ItemListOrderAscending",
+      "numberOfItems": {{ len . }},
+      "itemListElement": [
+        {{- $last := sub (len .) 1 -}}
+        {{- range $i, $t := . -}}
+          {
+            "@type": "ListItem",
+            "position": {{ add $i 1 }},
+            "url": "{{ $t.Page.Permalink }}",
+            "name": {{ $t.Page.Title | jsonify }},
+            "additionalProperty": [{
+              "@type": "PropertyValue",
+              "name": "postsCount",
+              "value": {{ $t.Count }}
+            }]
+          }{{ if lt $i $last }},{{ end }}
+        {{- end -}}
+      ]
+    }
+    </script>
+  {{ end }}
+
+  <script>
+  (function(){
+    const q = document.getElementById('termFilter');
+    const root = document.getElementById('termsRoot');
+    if(!q || !root) return;
+    const groups = root.querySelectorAll('.term-group');
+    const counter = document.getElementById('termCount');
+    function updateCount(){
+      const visible = root.querySelectorAll('.term-item:not([hidden])').length;
+      if(counter) counter.textContent = visible + ' termini visibili';
+    }
+    function onFilter(){
+      const value = (q.value || '').trim().toLowerCase();
+      groups.forEach(group => {
+        let any = false;
+        group.querySelectorAll('.term-item').forEach(a => {
+          const match = a.dataset.term.includes(value);
+          a.hidden = !match;
+          if(match) any = true;
+        });
+        group.hidden = !any;
+      });
+      updateCount();
+    }
+    q.addEventListener('input', onFilter);
+    updateCount();
+  })();
+  </script>
+{{ end }}

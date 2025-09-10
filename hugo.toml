@@ -1,0 +1,24 @@
+baseURL = "/"
+title = "Ordo ab Chao"
+theme = "neon-note"
+
+summaryLength = 30
+
+[taxonomies]
+  tag = "tags"
+
+
+
+[pagination]
+  pagerSize = 10
+
+[params]
+  description = "Sic alios devoramus subiectos"
+  dateFormat = "02 Jan 2006"
+
+
+[outputs]
+  home = ["HTML","RSS"]
+  section = ["HTML"]
+  taxonomy = ["HTML"]  # assicurati esista
+  term = ["HTML"]

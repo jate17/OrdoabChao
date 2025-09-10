@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home on Ordo ab Chao</title>
+    <link>//localhost:1313/</link>
+    <description>Recent content in Home on Ordo ab Chao</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 10 Sep 2025 12:30:00 +0200</lastBuildDate>
+    <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Benvenuto nel mio blog</title>
+      <link>//localhost:1313/posts/post-1/</link>
+      <pubDate>Wed, 10 Sep 2025 10:00:00 +0200</pubDate>
+      <guid>//localhost:1313/posts/post-1/</guid>
+      <description>&lt;h2 id=&#34;introduzione&#34;&gt;Introduzione&lt;/h2&gt;&#xA;&lt;p&gt;Benvenuto nel &lt;strong&gt;primo post&lt;/strong&gt; del mio blog. 🎉&#xA;Qui voglio testare come funziona la struttura del tema, verificare i meta tag SEO e provare la resa grafica di immagini, codice e link.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Benvenuto nel mio blog</title>
+      <link>//localhost:1313/posts/post-3/</link>
+      <pubDate>Wed, 10 Sep 2025 10:00:00 +0200</pubDate>
+      <guid>//localhost:1313/posts/post-3/</guid>
+      <description>&lt;h2 id=&#34;introduzione&#34;&gt;Introduzione&lt;/h2&gt;&#xA;&lt;p&gt;Benvenuto nel &lt;strong&gt;primo post&lt;/strong&gt; del mio blog. 🎉&#xA;Qui voglio testare come funziona la struttura del tema, verificare i meta tag SEO e provare la resa grafica di immagini, codice e link.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

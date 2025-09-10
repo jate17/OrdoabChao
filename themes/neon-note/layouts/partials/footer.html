@@ -1,0 +1,119 @@
+<footer class="mt-5" role="contentinfo" aria-label="Informazioni sul sito"
+        style="border-top:1px solid var(--ink); background:var(--surface);">
+  <div class="container container-narrow py-4">
+
+    {{/* ===== ROW: Nav + Social ===== */}}
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-3 mb-3">
+
+      {{/* --- Footer Nav (usa .Site.Menus.footer se esiste) --- */}}
+      {{ with .Site.Menus.footer }}
+      <nav aria-label="Link utili">
+        <ul class="list-unstyled d-flex flex-wrap gap-3 m-0">
+          {{ range . }}
+            <li>
+              <a class="link-quiet text-decoration-none"
+                href="{{ .URL }}" {{ with .Params.rel }}rel="{{ . }}"{{ end }}>
+                {{ .Name }}
+              </a>
+            </li>
+          {{ end }}
+        </ul>
+      </nav>
+      {{ end }}
+
+      {{/* --- Social (da .Site.Params.social: accetta array di {name,url} o semplice lista di url) --- */}}
+      {{ $social := slice }}
+      {{ with .Site.Params.social }}
+        {{ if (isset . 0) }}
+          {{/* è una lista */}}
+          {{ range . }}
+            {{ if (reflect.IsMap .) }}
+              {{ with .url }}{{ $social = $social | append . }}{{ end }}
+            {{ else }}
+              {{ $social = $social | append . }}
+            {{ end }}
+          {{ end }}
+        {{ else }}
+          {{/* è una mappa singola */}}
+          {{ range $k, $v := . }}
+            {{ $social = $social | append $v }}
+          {{ end }}
+        {{ end }}
+      {{ end }}
+
+      {{ if gt (len $social) 0 }}
+      <div class="d-flex flex-wrap gap-2 ms-sm-auto" aria-label="Social">
+        {{ range $social }}
+          <a class="badge tag text-decoration-none" href="{{ . }}" rel="me noopener" target="_blank" aria-label="Profilo social">
+            {{ . }}
+          </a>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+
+    {{/* ===== ROW: Copyright + Utility ===== */}}
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 small text-mute">
+      <div class="order-2 order-sm-1">
+        © {{ now.Year }} {{ .Site.Title }} ·
+        <a class="text-decoration-none readmore" href="https://gohugo.io" rel="nofollow noopener" target="_blank">Built with Hugo</a>
+        {{ with .OutputFormats.Get "RSS" }}
+          · <a class="text-decoration-none" href="{{ .Permalink }}">RSS</a>
+        {{ end }}
+      </div>
+
+      <button id="toTop"
+              class="order-1 order-sm-2"
+              type="button"
+              aria-label="Torna all'inizio"
+              style="display:none; border:none; cursor:pointer; padding:.45rem .7rem; border-radius:999px;
+                     background:rgba(130,200,255,.12); color:#9dd3ff; border:1px solid rgba(130,200,255,.25);">
+        ↑ Torna su
+      </button>
+    </div>
+  </div>
+
+  {{/* ===== JSON-LD Organization (SEO) ===== */}}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ .Site.Title | jsonify }},
+    "url": {{ .Site.BaseURL | absURL | jsonify }},
+    "sameAs": [
+      {{- $n := sub (len $social) 1 -}}
+      {{- range $i, $u := $social -}}
+        {{ $u | jsonify }}{{ if lt $i $n }},{{ end }}
+      {{- end -}}
+    ]
+  }
+  </script>
+
+  {{/* ===== JS leggerissimo: mostra il bottone "Torna su" e gestisce lo scroll ===== */}}
+  <script>
+  (function () {
+    var btn = document.getElementById('toTop');
+    if (!btn) return;
+    var showAfter = 240; // px
+    var ticking = false;
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(function () {
+          var y = window.scrollY || document.documentElement.scrollTop;
+          btn.style.display = (y > showAfter) ? 'inline-block' : 'none';
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+    function toTop() {
+      var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) { window.scrollTo(0,0); return; }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    btn.addEventListener('click', toTop);
+  })();
+  </script>
+</footer>

@@ -1,0 +1,17 @@
+<header class="navbar-wrap sticky-top">
+  <nav class="navbar navbar-expand-md container container-narrow">
+    <a class="navbar-brand fw-semibold text-white" href="{{ "/" | relURL }}">{{ .Site.Title }}</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div id="nav" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        {{ range .Site.Menus.main }}
+        <li class="nav-item">
+          <a class="nav-link link-mute" href="{{ .URL }}">{{ .Name }}</a>
+        </li>
+        {{ end }}
+      </ul>
+    </div>
+  </nav>
+</header>
